@@ -51,12 +51,12 @@ model User {
   createdAt DateTime @default(now())
 
   // Relations
-  devices         UserDevice[]
-  doctorProfile   DoctorProfile?
-  appointmentsPatient Appointment[] @relation("PatientAppointments")
-  appointmentsDoctor  Appointment[] @relation("DoctorAppointments")
-  reportsPatient  HealthReport[] @relation("PatientReports")
-  reportsDoctor   HealthReport[] @relation("DoctorReports")
+  devices              UserDevice[]
+  doctorProfile        DoctorProfile?
+  appointmentsPatient  Appointment[]  @relation("PatientAppointments")
+  appointmentsDoctor   Appointment[]  @relation("DoctorAppointments")
+  reportsPatient       HealthReport[] @relation("PatientReports")
+  reportsDoctor        HealthReport[] @relation("DoctorReports")
   prescriptionsPatient Prescription[] @relation("PatientPrescriptions")
   prescriptionsDoctor  Prescription[] @relation("DoctorPrescriptions")
 
@@ -92,27 +92,28 @@ model Category {
 model DoctorProfile {
   id              String  @id @default(uuid())
   userId          String  @unique
-  categoryId      String
+  categoryId      String // Maps to specialization
   bio             String?
   experienceYears Int     @default(0)
-  workStartTime   String  // e.g., "09:00"
-  workEndTime     String  // e.g., "17:00"
+  consultationFee Decimal @default(0.00) @db.Decimal(10, 2) // Added per requirements
+  workStartTime   String
+  workEndTime     String
   isAvailable     Boolean @default(true)
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@index([categoryId])
   @@map("doctor_profiles")
 }
 
 model Appointment {
-  id               String            @id @default(uuid())
-  patientId        String
-  doctorId         String
-  appointmentDate  DateTime
-  status           AppointmentStatus @default(PENDING)
-  createdAt        DateTime          @default(now())
+  id              String            @id @default(uuid())
+  patientId       String
+  doctorId        String
+  appointmentDate DateTime
+  status          AppointmentStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
 
   patient User @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
   doctor  User @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
@@ -127,7 +128,7 @@ model HealthReport {
   id                  String             @id @default(uuid())
   patientId           String
   doctorId            String
-  bodyPartCoordinates Json               // Stores JSON coordinates
+  bodyPartCoordinates Json // Stores JSON coordinates
   description         String
   audioNoteUrl        String?
   status              HealthReportStatus @default(NEW)
