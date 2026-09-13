@@ -110,9 +110,13 @@ model DoctorProfile {
 model Appointment {
   id              String            @id @default(uuid())
   patientId       String
-  doctorId        String
-  appointmentDate DateTime
+  doctorId        String // Links to User (Role.DOCTOR)
+  appointmentDate DateTime // The date of the appointment
+  startTime       String // e.g., "09:00"
+  endTime         String // e.g., "09:30"
   status          AppointmentStatus @default(PENDING)
+  notes           String?
+  cancelReason    String?
   createdAt       DateTime          @default(now())
 
   patient User @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
